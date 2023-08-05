@@ -10,11 +10,11 @@ describe("Lock", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
   async function deployOneYearLockFixture() {
-    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-    const ONE_GWEI = 1_000_000_000;
+    const ONE_MINUTE = 60;
+    const ONE_WEI = 1;
 
-    const lockedAmount = ONE_GWEI;
-    const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
+    const lockedAmount = ONE_WEI;
+    const unlockTime = (await time.latest()) + ONE_MINUTE;
 
     // Contracts are deployed using the first signer/account by default
     const [owner, otherAccount] = await ethers.getSigners();
@@ -58,7 +58,7 @@ describe("Lock", function () {
     });
   });
 
-  describe("Withdrawals", function () {
+  describe("Transactions", function () {
     describe("Validations", function () {
       it("Should revert with the right error if called too soon", async function () {
         const { lock } = await loadFixture(deployOneYearLockFixture);
@@ -91,6 +91,16 @@ describe("Lock", function () {
         await time.increaseTo(unlockTime);
 
         await expect(lock.withdraw()).not.to.be.reverted;
+      });
+      it("Should return the new balance after ether is deposited", async function () {
+        const { lock, lockedAmount } = await loadFixture(
+          deployOneYearLockFixture
+        );
+        await lock.deposit({ value: 10 });
+
+        expect(await ethers.provider.getBalance(lock.target)).to.equal(
+          lockedAmount + 10
+        );
       });
     });
 
