@@ -5,7 +5,7 @@ function App() {
   const [depositValue, setDepositValue] = useState(0);
   const [withdrawValue, setWithdrawValue] = useState(0);
   const [contractBalance, setContractBalance] = useState();
-
+  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
 
@@ -13,7 +13,13 @@ function App() {
     const connectWallet = async () => {
       await provider.send("eth_requestAccounts", []);
     };
+
+    const getBalance = async () => {
+      const balance = await provider.getBalance(contractAddress);
+      setContractBalance(ethers.utils.formatEther(balance));
+    };
     connectWallet().catch(console.error);
+    getBalance().catch(console.error);
   }, []);
   let handleDepositChange = (e) => {
     setDepositValue(e.target.value);
@@ -36,7 +42,7 @@ function App() {
         <div className="row mt-5">
           <div className="col">
             <h1>Greetings</h1>
-            <p>Contract balance: 0</p>
+            <p>Contract balance: {contractBalance} ETH</p>
           </div>
           <div className="col">
             <form onSubmit={handleDepositSubmit}>
