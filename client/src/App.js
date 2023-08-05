@@ -2,12 +2,90 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
 function App() {
-  const [depositValue, setDepositValue] = useState(0);
-  const [withdrawValue, setWithdrawValue] = useState(0);
+  const [depositValue, setDepositValue] = useState();
+  const [withdrawValue, setWithdrawValue] = useState();
   const [contractBalance, setContractBalance] = useState();
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
+
+  // The ERC-20 Contract ABI, which is a common contract interface
+  // for tokens (this is the Human-Readable ABI format)
+  const ABI = [
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "_unlockTime",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "payable",
+      type: "constructor",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "amount",
+          type: "uint256",
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "when",
+          type: "uint256",
+        },
+      ],
+      name: "Withdrawal",
+      type: "event",
+    },
+    {
+      inputs: [],
+      name: "deposit",
+      outputs: [],
+      stateMutability: "payable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "owner",
+      outputs: [
+        {
+          internalType: "address payable",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "unlockTime",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "withdraw",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+  ];
+
+  // The Contract object
+  const TokenContract = new ethers.Contract(contractAddress, ABI, signer);
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -30,11 +108,20 @@ function App() {
 
   let handleDepositSubmit = async (e) => {
     e.preventDefault();
-    console.log(depositValue);
+    const ethValue = ethers.utils.parseEther(depositValue);
+    const depositUpdate = await TokenContract.deposit({ value: ethValue });
+    await depositUpdate.wait();
+    setDepositValue();
+    const balance = await provider.getBalance(contractAddress);
+    setContractBalance(ethers.utils.formatEther(balance));
   };
   let handleWithdrawSubmit = async (e) => {
     e.preventDefault(withdrawValue);
-    console.log(withdrawValue);
+    const withdrawUpdate = await TokenContract.withdraw();
+    await withdrawUpdate.wait();
+    setWithdrawValue();
+    const balance = await provider.getBalance(contractAddress);
+    setContractBalance(ethers.utils.formatEther(balance));
   };
   return (
     <div className="container">
@@ -64,7 +151,7 @@ function App() {
                 <input
                   type="number"
                   className="form-control"
-                  placeholder="Hello world"
+                  placeholder="0"
                   value={withdrawValue}
                   onChange={handleWithdrawChange}
                 />
