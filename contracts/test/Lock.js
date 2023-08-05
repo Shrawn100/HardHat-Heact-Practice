@@ -96,7 +96,7 @@ describe("Lock", function () {
         const { lock, lockedAmount } = await loadFixture(
           deployOneYearLockFixture
         );
-        await lock.deposit({ value: 10 });
+        await lock.deposit({ value: 10 }).wait();
 
         expect(await ethers.provider.getBalance(lock.target)).to.equal(
           lockedAmount + 10
