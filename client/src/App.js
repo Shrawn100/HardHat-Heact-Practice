@@ -5,7 +5,7 @@ function App() {
   const [depositValue, setDepositValue] = useState();
   const [withdrawValue, setWithdrawValue] = useState();
   const [contractBalance, setContractBalance] = useState();
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  const contractAddress = "0xa3f94F1EC498e85b95FD34c3cB5801b5412fd0C4";
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
 
@@ -135,7 +135,6 @@ function App() {
             <form onSubmit={handleDepositSubmit}>
               <div className="mb-3">
                 <input
-                  type="number"
                   className="form-control"
                   placeholder="0"
                   value={depositValue}
@@ -149,7 +148,6 @@ function App() {
             <form onSubmit={handleWithdrawSubmit} className="mt-5">
               <div className="mb-3">
                 <input
-                  type="number"
                   className="form-control"
                   placeholder="0"
                   value={withdrawValue}
